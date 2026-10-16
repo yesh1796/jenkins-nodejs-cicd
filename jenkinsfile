@@ -1,0 +1,30 @@
+
+pipeline {
+    agent any
+
+    triggers {
+        pollSCM('H/2 * * * *')
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+                bat 'npm install'
+                bat 'docker build -t nodejs-demo-app:latest .'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                bat 'npm test'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                bat 'docker rm -f nodejs-demo-app || exit /b 0'
+                bat 'docker run -d --name nodejs-demo-app -p 3000:3000 nodejs-demo-app:latest'
+            }
+        }
+    }
+}
